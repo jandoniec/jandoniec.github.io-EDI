@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, 
+    initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="edifavicon.ico">
+
+
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+
+
+
+  <title>Group project</title>
+</head>
+
+<body>
+  <header>
+    <h1>Top 100 best movies</h1>
+    <h3>Project team members:</h3>
+    <h2>
+      <p class="column">
+        Anastasiia Chorna
+      </p>
+      <p class="column">
+        Paweł Burda
+      </p>
+      <p class="column">
+        Jan Doniec
+      </p>
+    </h2>
+  </header>
+  <div class="container">
+    <p class="side">
+      <img src="tape.png" alt="">
+    </p>
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th scope="col">Rank</th>
+          <th scope="col">Title</th>
+          <th scope="col">Genre</th>
+          <th scope="col">Released</th>
+          <th scope="col">Director</th>
+          <th scope="col">Duration</th>
+
+
+        </tr>
+      </thead>
+      <tbody id="table_body">
+
+
+      </tbody>
+    </table>
+    <p class="side">
+      <img src="tape.png" alt="">
+    </p>
+    </div>
+    <script>
+        fetch('https://my.api.mockaroo.com/topfilms.json?key=6bb78e90').then((data)=>{
+            return data.json();
+        }).then((objectData)=>{
+            
+            let tableData="";
+            objectData.map((values)=>{
+                tableData+=`<tr>
+                    <td>${values.Rank}</td>
+                    <td>${values.Title}</td>
+                    <td>${values.Genre}</td>
+                    <td>${values.Released}</td>
+                    <td>${values.Director}</td>
+                    <td>${values.Duration}</td>
+                </tr>`;
+      });
+      document.getElementById("table_body").innerHTML = tableData;
+    })
+  </script>
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+
+  <div class="chart">
+    <canvas id="Chart"></canvas>
+  </div>
+
+  <script>
+    fetch('https://my.api.mockaroo.com/topfilms.json?key=6bb78e90').then((data) => {
+      return data.json();
+    }).then((objectData) => {
+      let genres = objectData.map(values => values.Genre);
+      let counts = {};
+      genres.forEach(function (x) { counts[x] = (counts[x] || 0) + 1; });
+      let labels = Object.keys(counts);
+      let data = Object.values(counts);
+      var bgColors = [];
+      var colors = ['#7768A4', '#A46877', '#95A468', '#68A495']
+      for (var i = 0; i < data.length; i++) {
+        bgColors.push(colors[i % colors.length]);
+      }
+      let ctx = document.getElementById('Chart').getContext('2d');
+      let genreChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "hide",
+            data: data,
+            backgroundColor: bgColors,
+          }]
+        },
+        options: {
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: 'Distribution of Movie Genres',
+          },
+        }
+      });
+    });</script>
+
+  <div class="chart" style="padding-bottom: 10vh;">
+    <canvas id="durationChart"></canvas>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+  <script>
+    fetch('https://my.api.mockaroo.com/topfilms.json?key=6bb78e90')
+      .then((data) => data.json())
+      .then((objectData) => {
+        const durationCounts = {
+          "0-60": 0,
+          "61-120": 0,
+          "121-180": 0,
+          "181+": 0
+        };
+
+        objectData.forEach((movie) => {
+          const duration = parseInt(movie.Duration, 10);
+          if (duration <= 60) {
+            durationCounts["0-60"]++;
+          } else if (duration <= 120) {
+            durationCounts["61-120"]++;
+          } else if (duration <= 180) {
+            durationCounts["121-180"]++;
+          } else {
+            durationCounts["181+"]++;
+          }
+        });
+
+        const ctx = document.getElementById('durationChart').getContext('2d');
+        const chart = new Chart(ctx, {
+          type: 'pie',
+
+          data: {
+            labels: Object.keys(durationCounts),
+            datasets: [{
+              label: 'Movie Duration Distribution',
+              backgroundColor: ['#7768A4', '#A46877', '#95A468', '#68A495'],
+              data: Object.values(durationCounts)
+            }]
+          },
+          options: {}
+        });
+      });
+  </script>
+  <footer>
+    <p class="column">
+      <a href="#table_body">Movies List</a>
+    </p>
+    <p class="column">
+      <a href="#Chart">Genre Chart</a>
+    </p>
+    <p class="column">
+      <a href="#durationChart">Duration Chart</a>
+    </p>
+    <p>
+      EDI Project (8.01.2023)
+    </p>
+  </footer>
+</body>
+</html>
